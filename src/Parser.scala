@@ -30,7 +30,7 @@ object Parser {
     }
   }
 
-  def plus[T](p: Parser[T], q: Parser[T])(input: String): Result[T] = {
+  def plus[T](p: Parser[T], q: => Parser[T])(input: String): Result[T] = {
     p(input) ++ q(input)
   }
     
@@ -145,15 +145,22 @@ object Parser {
 
   val ints: Parser[List[Int]] = bracket(`[`, sepBy1(int, `,`), `]`)
 
-  lazy val expr: Parser[Int] = (for {
-    x <- expr
-    f <- addop
-    y <- factor
-  } yield f(x, y)) ++ factor
+  lazy val expr: Parser[Int] = for {
+    x <- factor
+    fys <- many {
+      for {
+        f <- addop
+        y <- factor
+      } yield (f, y)
+    }
+  } yield {
+    fys.foldLeft(x) { case (a, (b, c)) => b(a, c) }
+  }
 
   lazy val `op+`: Parser[(Int, Int) => Int] = for { _ <- char('+') } yield (_ + _)
   lazy val `op-`: Parser[(Int, Int) => Int] = for { _ <- char('-') } yield (_ - _)
 
   lazy val addop: Parser[(Int, Int) => Int] = `op+` ++ `op-`
   lazy val factor: Parser[Int] = nat ++ bracket(`(`, expr, `)`)
+
 }
