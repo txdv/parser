@@ -102,6 +102,14 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
   
   "ints" should "parse ints enclosed with [] and seperated by commas" in {
     eval(ints("[1,2,3,42]")) should be(Some(List(1, 2, 3, 42)))
+  }
 
+  "addop" should "create sum or minus in parser" in {
+    eval(addop("+")).map(f => f(1, 2)) should be(Some(3))
+    eval(addop("-")).map(f => f(1, 2)) should be(Some(-1))
+  }
+
+  "expr" should "evaluate simple expression" in {
+    eval(expr("1")) should be(Some(1))
   }
 }

@@ -144,4 +144,16 @@ object Parser {
   } yield x
 
   val ints: Parser[List[Int]] = bracket(`[`, sepBy1(int, `,`), `]`)
+
+  lazy val expr: Parser[Int] = (for {
+    x <- expr
+    f <- addop
+    y <- factor
+  } yield f(x, y)) ++ factor
+
+  lazy val `op+`: Parser[(Int, Int) => Int] = for { _ <- char('+') } yield (_ + _)
+  lazy val `op-`: Parser[(Int, Int) => Int] = for { _ <- char('-') } yield (_ - _)
+
+  lazy val addop: Parser[(Int, Int) => Int] = `op+` ++ `op-`
+  lazy val factor: Parser[Int] = nat ++ bracket(`(`, expr, `)`)
 }
