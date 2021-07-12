@@ -165,4 +165,24 @@ object Parser {
   lazy val addop: Parser[(Int, Int) => Int] = `op+` ++ `op-`
   lazy val factor: Parser[Int] = nat ++ bracket(`(`, expr, `)`)
 
+  /*
+  def ops[T, S](xs: List[(Parser[T], S)]): Parser[S] = {
+    val r = for {
+      (p, op) <- xs
+    } yield {
+      for { _ <- p } yield op
+    }
+
+    r match {
+      case (x :: xs) => xs.foldRight(x)(_++_)
+      case _ => zero
+    }
+  }
+
+  lazy val addop: Parser[(Int, Int) => Int] = ops(List(
+    (char('+'), (a: Int, b: Int) => a + b),
+    (char('-'), (a: Int, b: Int) => a - b),
+  ))
+  */
+
 }
