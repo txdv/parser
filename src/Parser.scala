@@ -160,6 +160,17 @@ object Parser {
   lazy val addop: Parser[(Int, Int) => Int] = `op+` ++ `op-`
   lazy val factor: Parser[Int] = nat ++ bracket(`(`, expr, `)`)
 
+  def chainr1[T](p: Parser[T], op: Parser[(T, T) => T]): Parser[T] = {
+    p.flatMap(x => {
+      val t = (for {
+        f <- op
+        y <- chainr1(p, op)
+      } yield f(x, y))
+
+      t ++ result(x)
+    })
+  }
+
   /*
   def ops[T, S](xs: List[(Parser[T], S)]): Parser[S] = {
     val r = for {
