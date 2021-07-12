@@ -145,16 +145,18 @@ object Parser {
 
   val ints: Parser[List[Int]] = bracket(`[`, sepBy1(int, `,`), `]`)
 
-  lazy val expr: Parser[Int] = for {
-    x <- factor
+  lazy val expr: Parser[Int] = chainl1(factor, addop)
+
+  def chainl1[T](p: Parser[T], op: Parser[(T, T) => T]): Parser[T] = for {
+    x <- p
     fys <- many {
       for {
-        f <- addop
-        y <- factor
+        f <- op
+        y <- p
       } yield (f, y)
     }
   } yield {
-    fys.foldLeft(x) { case (a, (b, c)) => b(a, c) }
+    fys.foldLeft(x) { case (x, (f, y)) => f(x, y) }
   }
 
   lazy val `op+`: Parser[(Int, Int) => Int] = for { _ <- char('+') } yield (_ + _)
