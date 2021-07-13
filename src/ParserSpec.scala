@@ -112,4 +112,30 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
   "expr" should "evaluate simple expression" in {
     eval(expr("1")) should be(Some(1))
   }
+
+  "expr" should "evaluate complex expression" in {
+    eval(expr("1+1")) should be(Some(2))
+    eval(expr("(1+1)")) should be(Some(2))
+    eval(expr("2-(1+1)")) should be(Some(0))
+    eval(expr("2-((1+1)-2)")) should be(Some(2))
+    eval(expr("((1))")) should be(Some(1))
+  }
+
+  def generate(i: Int): String = {
+    if (i == 0) {
+      "1"
+    } else if (i % 5 == 0) {
+      generate(i - 1) + "+" + generate(i - 1)
+    } else {
+      "(" + generate(i - 1) + ")"
+    }
+  }
+
+  "expr" should "evaluate really complex expressions" in {
+    eval(expr(generate(50))) should be(Some(1024))
+  }
+
+  "plus" should "combine parser with zero and have the same output" in {
+    eval((zero ++ int)("1")) should be(Some(1))
+  }
 }

@@ -145,7 +145,7 @@ object Parser {
 
   val ints: Parser[List[Int]] = bracket(`[`, sepBy1(int, `,`), `]`)
 
-  lazy val expr: Parser[Int] = chainl1(factor, addop)
+  lazy val expr: Parser[Int] = chainl1(factor, addop2)
 
   def chainl1[T](p: Parser[T], op: Parser[(T, T) => T]): Parser[T] = {
     def rest(x: T): Parser[T] =
@@ -171,7 +171,6 @@ object Parser {
     })
   }
 
-  /*
   def ops[T, S](xs: List[(Parser[T], S)]): Parser[S] = {
     val r = for {
       (p, op) <- xs
@@ -179,16 +178,12 @@ object Parser {
       for { _ <- p } yield op
     }
 
-    r match {
-      case (x :: xs) => xs.foldRight(x)(_++_)
-      case _ => zero
-    }
+    r.reduceRight(_ ++ _)
   }
 
-  lazy val addop: Parser[(Int, Int) => Int] = ops(List(
+  lazy val addop2: Parser[(Int, Int) => Int] = ops(List(
     (char('+'), (a: Int, b: Int) => a + b),
     (char('-'), (a: Int, b: Int) => a - b),
   ))
-  */
 
 }
