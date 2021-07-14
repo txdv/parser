@@ -9,3 +9,42 @@ scala_test(
     name = "parser_spec",
     srcs = ["ParserSpec.scala"],
     deps = [":parser"])
+
+scala_library(
+    name = "json",
+    srcs = ["Json.scala"],
+    deps = [":parser"],
+    exports = [":parser"])
+
+scala_test(
+    name = "json_spec",
+    srcs = ["JsonSpec.scala"],
+    deps = [":json"])
+
+scala_library(
+    name = "html",
+    srcs = ["Html.scala"],
+    deps = [":parser"],
+    exports = [":parser"])
+
+scala_test(
+    name = "html_spec",
+    srcs = ["HtmlSpec.scala"],
+    deps = [":html"])
+
+scala_binary(
+    name = "html_test",
+    main_class = "bentkus.parser.HtmlTest",
+    srcs = ["HtmlTest.scala"],
+    deps = [":html", ":css"])
+
+scala_library(
+    name = "css",
+    srcs = ["Css.scala"],
+    deps = [":parser"],
+    exports = [":parser"])
+
+scala_test(
+    name = "css_spec",
+    srcs = ["CssSpec.scala"],
+    deps = [":css"])

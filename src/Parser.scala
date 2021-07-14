@@ -1,7 +1,7 @@
 package bentkus.parser
 
 object Parser {
-  trait Monad[F[_], T] {
+  trait Monad[F[_], +T] {
     def map[S](f: T => S): F[S]
 
     def flatMap[S](f: T => F[S]): F[S]
@@ -186,4 +186,54 @@ object Parser {
     (char('-'), (a: Int, b: Int) => a - b),
   ))
 
+  def take(p: Char => Boolean): Parser[String] = { input: String =>
+    val result = input.takeWhile(p)
+
+    if (result.length > 0) {
+      List((result, input.substring(result.length)))
+    } else {
+      List.empty
+    }
+  }
+
+  def next: Parser[Option[Char]] = { input: String =>
+    val empty = (None, input)
+    if (input.length == 0) {
+      List(empty)
+    } else {
+      val found = (Some(input(0)), input.substring(1))
+      List(found, empty)
+    }
+  }
+
+/*
+  def next2(p: Char => Boolean): Parser[Option[Char]] = { input: String =>
+    val empty = (None, input)
+    if (input.length == 0) {
+      List(empty)
+    } else {
+      val ch = input(0)
+      if (p(ch)){
+        val found = (Some(ch), input.substring(1))
+        List(found)
+      } else {
+        List(empty)
+      }
+    }
+  }
+  */
+
+  def next2(p: Char => Boolean): Parser[Option[Char]] =
+   sat(p).map(ch => Option(ch)) ++ result(Option.empty[Char])
+
+
+  /*
+  def exists(p: Char => Boolean): Parser[Boolean] = { input: String =>
+    if (input.length == 0) {
+      List.empty
+    } else {
+      List.empty
+    }
+  }
+  */
 }

@@ -138,4 +138,17 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
   "plus" should "combine parser with zero and have the same output" in {
     eval((zero ++ int)("1")) should be(Some(1))
   }
+
+  "next" should "poke next token" in {
+    val html = for {
+      _ <- char('<')
+      _ <- ident("html")
+      closing <- next2(_ == '/')
+      _ <- char('>')
+    } yield closing.contains('/')
+
+    eval(next("a")) should be(Some(Some('a')))
+    eval(html("<html>")) should be(Some(false))
+    eval(html("<html/>")) should be(Some(true))
+  }
 }
