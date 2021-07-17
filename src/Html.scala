@@ -4,7 +4,6 @@ import Parser._
 
 sealed trait Html {
   val children: Seq[Html]
-
 }
 
 case class Tag(
@@ -40,7 +39,7 @@ object Html {
 
   val space = ` `
 
-  val word = take(_.isLetter)
+  val word = take(_.isLetterOrDigit)
 
   val openTag = for {
     _ <- `<`

@@ -24,7 +24,7 @@ class CssSpec extends AnyFlatSpec with should.Matchers {
     })
   }
 
-  "css" should "parse nesamone"  in {
+  "css" should "parse basic css rule with spaces"  in {
     eval(keyValues("color: blue; font-weight   :  \t bold;")) should be(Some {
       Seq("color" -> "blue", "font-weight" -> "bold")
     })
@@ -35,10 +35,16 @@ class CssSpec extends AnyFlatSpec with should.Matchers {
 
   "css" should "parse rule" in {
     val rule = ("p", Seq("color" -> "blue", "font-weight" -> "bold"))
-    eval(d("""p {color:blue;font-weight:bold;}""")) should be(Some(rule))
-    eval(d("""p {
+    eval(definition("""p {color:blue;font-weight:bold;}""")) should be(Some(rule))
+    eval(definition("""p {
       color:blue;
       font-weight:bold;
     }""")) should be(Some(rule))
+
+    eval(definition("""h1 {color:blue;}""")) should be(Some {
+      ("h1", Seq("color" -> "blue"))
+    })
+
+    //eval(d("""h1 { color: blue }""")) should be(Some(
   }
 }

@@ -48,3 +48,8 @@ scala_test(
     name = "css_spec",
     srcs = ["CssSpec.scala"],
     deps = [":css"])
+
+scala_binary(
+    name = "test",
+    main_class = "bentkus.parser.Test",
+    srcs = ["Test.scala"])

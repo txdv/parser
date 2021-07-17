@@ -7,6 +7,7 @@ object Color {
   case object Green extends Color
   case object Red extends Color
   case object Yellow extends Color
+  case object Blue extends Color
 }
 
 sealed trait TStyle extends Style
@@ -14,6 +15,7 @@ object TStyle {
   case object Bold extends TStyle
   case object Underline extends TStyle
   case object Italic extends TStyle
+  case object Blink extends TStyle
 }
 
 object IO {
@@ -21,6 +23,8 @@ object IO {
     scala.io.Source.fromFile(filename).mkString.trim
   }
 }
+
+case class Rule(tagName: String, styles: Seq[Style])
 
 object HtmlTest {
 
@@ -35,29 +39,59 @@ object HtmlTest {
 
   val default = "\u001b[39m"
 
+  val blink = "\u001b[5m"
+  val noblink = "\u001b[25m"
+
+  def styleRules(tag: Html): Seq[Rule] = tag match {
+    case text: Text =>
+      val results = Parser.eval(Css.definitions(text.text)).toSeq
+
+      for {
+        result <- results
+        definition <- result
+      } yield definition match {
+        case (name, stringStyles) =>
+          val styles = stringStyles.flatMap(style)
+          Rule(name, styles)
+      }
+    case _ =>
+      Seq.empty
+  }
+
+  var styling: Seq[Rule] = Seq.empty
+
   def format(text: String): Unit = {
     val html = Parser.eval(Html.html(text)).getOrElse {
       throw new Exception("can't parse html")
     }
 
-    jq(List("html", "body"), html).foreach(format)
+    styling = jq("html.head.style", html).flatMap(styleRules)
+
+    jq("html.body", html).foreach(format)
   }
-  
+
   def style(input: String): Seq[Style] = {
     Parser.eval(Css.keyValues(input)).toSeq.flatMap { rules =>
-      rules.flatMap {
-        case ("color", color) =>
-          color match {
-            case "green"  => Some(Color.Green)
-            case "red"    => Some(Color.Red)
-            case "yellow" => Some(Color.Yellow)
-            case _        => None
-          }
-        case ("font-weight", "bold") => Some(TStyle.Bold)
-        case ("text-decoration", "underline") => Some(TStyle.Underline)
+      rules.flatMap(style)
+    }
+  }
 
-        case (_, _) => None
-      }
+  def style(input: (String, String)): Seq[Style] = {
+    val empty = Seq.empty
+
+    input match {
+      case ("color", color) =>
+        color match {
+          case "green"  => Seq(Color.Green)
+          case "red"    => Seq(Color.Red)
+          case "yellow" => Seq(Color.Yellow)
+          case "blue"   => Seq(Color.Blue)
+          case _        => empty
+        }
+      case ("font-weight", "bold") => Seq(TStyle.Bold)
+      case ("text-decoration", "underline") => Seq(TStyle.Underline)
+
+      case (_, _) => empty
     }
   }
 
@@ -66,9 +100,11 @@ object HtmlTest {
       case Color.Green      => Console.GREEN
       case Color.Red        => Console.RED
       case Color.Yellow     => Console.YELLOW
+      case Color.Blue       => Console.BLUE
       case TStyle.Bold      => bold
       case TStyle.Underline => underline
       case TStyle.Italic    => italic
+      case TStyle.Blink     => blink
     }
   }
 
@@ -95,16 +131,14 @@ object HtmlTest {
   }
 
   def cleanup(style: Style): Unit = {
-    style match {
-      case _: Color =>
-        print(default)
-      case TStyle.Bold =>
-        print(nobold)
-      case TStyle.Underline =>
-        print(nounderline)
-      case TStyle.Italic =>
-        print(noitalic)
+    val code = style match {
+      case _: Color => default
+      case TStyle.Bold => nobold
+      case TStyle.Underline => nounderline
+      case TStyle.Italic => noitalic
+      case TStyle.Blink => noblink
     }
+    print(code)
   }
 
   def styleFromTag(name: String): Seq[TStyle] = {
@@ -116,17 +150,41 @@ object HtmlTest {
     }
   }
 
+  val ws = Seq(' ', '\t', '\n', '\r')
+
+  def onlySpaces(str: String): Boolean = {
+    str.forall(ws.contains)
+  }
+
   def format(html: Html): Unit = {
     html match {
       case Text(text) =>
-        print(text)
+        if (!onlySpaces(text)) {
+          print(text.trim)
+          print(" ")
+        }
       case Tag(name, attr, children) =>
+        name match {
+          case "h1" | "h2" | "p" => println
+          case _ =>
+        }
+        val styles = styling.find(_.tagName == name).toSeq.flatMap(_.styles)
+
         val stylesTags = styleFromTag(name)
         val stylesAttrs = attr.get("style").toSeq.flatMap(style)
-        st(stylesTags ++ stylesAttrs) {
+        st(styles ++ stylesTags ++ stylesAttrs) {
           children.foreach(format)
         }
+
+        name match {
+          case "h1" | "h2" | "p" => println
+          case _ =>
+        }
     }
+  }
+
+  def jq(path: String, html: Seq[Html]): Seq[Html] = {
+    jq(path.split("\\.").toList, html)
   }
 
   def jq(names: List[String], html: Seq[Html]): Seq[Html] = {
@@ -146,9 +204,7 @@ object HtmlTest {
 
   def main(args: Array[String]): Unit = {
     args.foreach { arg =>
-
       format(IO.read(arg))
-
     }
   }
 }

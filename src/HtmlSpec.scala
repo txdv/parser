@@ -34,11 +34,11 @@ class HtmlSpec extends AnyFlatSpec with should.Matchers {
       }
     })
   }
-  
+
   "html" should "parse text and html tags" in {
-    eval(html("stand alone text")) should be(Some(Text("stand alone text")))
-    eval(html("<b>bolded text</b>")) should be(Some {
+    eval(html("stand alone text")) should be(Some(List(Text("stand alone text"))))
+    eval(html("<b>bolded text</b>")) should be(Some(List {
       Tag("b").child(Text("bolded text"))
-    })
+    }))
   }
 }

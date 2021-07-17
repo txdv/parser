@@ -15,7 +15,7 @@ object Css {
   val `:` = token(char(':'))
   val `;` = token(char(';'))
 
-  val word = take(ch => ch.isLetter || ch == '-')
+  val word = take(ch => ch.isLetterOrDigit || ch == '-')
 
   val key = word
 
@@ -32,10 +32,15 @@ object Css {
 
   val keyValues = many(keyValue)
 
-  val d = for {
+  val definition = for {
     name <- token(ident2)
     _ <- token(char('{'))
     vs <- keyValues
     _ <- token(char('}'))
   } yield (name, vs)
+
+  val definitions = for {
+    res <- many(token(definition))
+    _ <- many(sat(ws.contains))
+  } yield res
 }
