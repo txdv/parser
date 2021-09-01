@@ -17,6 +17,10 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
   }
   */
 
+  "jnull" should "parse null" in {
+    eval(jnull("null")) should be (Some(JNull))
+  }
+
   "jbool" should "parse booleans" in {
     eval(jbool("true")) should be (Some(JBool(true)))
     eval(jbool("false")) should be (Some(JBool(false)))
@@ -38,6 +42,6 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
     //eval(jarray("[]")) should be(Some(JArray(Seq.empty)))
     eval(jarray("[1]")) should be(Some(JArray(Seq(JInt(1)))))
     eval(jarray("[1,2]")) should be(Some(JArray(Seq(JInt(1), JInt(2)))))
-    eval(jarray("[true,false]")) should be(Some(JArray(Seq(JBool(true), JBool(false)))))
+    eval(jarray("[true,false,null]")) should be(Some(JArray(Seq(JBool(true), JBool(false), JNull))))
   }
 }

@@ -19,8 +19,13 @@ case class JInt(value: Int) extends JObject
 case class JString(value: String) extends JObject
 case class JArray(value: Seq[JObject]) extends JObject
 case class JMap(map: Map[String, JObject]) extends JObject
+case object JNull extends JObject
 
 object Json {
+  val jnull: Parser[JObject] = for {
+    _ <- ident("null")
+  } yield JNull
+
   val `true` = for {
     _ <- ident("true")
   } yield JBool(true)
@@ -58,6 +63,6 @@ object Json {
     _ <- char('}')
   } yield JMap(Map(keyValues))
 
-  val jexpr: Parser[JObject] = plus(plus(plus(plus(jbool, jint), jstring), jarray), jmap)
+  val jexpr: Parser[JObject] = plus(jnull, plus(plus(plus(plus(jbool, jint), jstring), jarray), jmap))
   //val jexpr: Parser[JObject] = jbool +++ jint +++ jstring +++ jarray +++ jmap
 }
