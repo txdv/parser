@@ -10,6 +10,12 @@ scala_test(
     srcs = ["ParserSpec.scala"],
     deps = [":parser"])
 
+scala_binary(
+    name = "parser_main",
+    main_class = "bentkus.parser.Main",
+    srcs = ["ParserMain.scala"],
+    deps = [":parser"])
+
 scala_library(
     name = "json",
     srcs = ["Json.scala"],
