@@ -5,6 +5,7 @@ import flatspec._
 import matchers._
 
 import Parser._
+import Span.Conversions._
 
 class ParserSpec extends AnyFlatSpec with should.Matchers {
   "item" should "parse singular char string" in {
@@ -56,8 +57,8 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
   }
 
   "ident" should "parse specified identifier" in {
-    eval(ident("asd")("asd"))should be(Some("asd"))
-    eval(ident("asd")("asb"))should be(None)
+    eval(ident("asd")("asd")) should be(Some(Span("asd")))
+    eval(ident("asd")("asb")) should be(None)
   }
 
   "many" should "parse a parser multiple times" in {

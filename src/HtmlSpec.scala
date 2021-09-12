@@ -7,6 +7,8 @@ import matchers._
 import bentkus.parser.Tag // override specs2 tag definition
 
 import Parser._
+import Span.Conversions._
+
 import Html._
 
 class HtmlSpec extends AnyFlatSpec with should.Matchers {

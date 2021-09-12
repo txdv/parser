@@ -28,7 +28,7 @@ object Css {
     _ <- `;`
   } yield (k, v)
 
-  val ident2 = sepBy1(word, char('.')).map(_.mkString("."))
+  val ident2 = sepBy1(word, char('.')).map(_.map(_.string).mkString("."))
 
   val keyValues = many(keyValue)
 

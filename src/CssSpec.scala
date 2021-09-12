@@ -5,6 +5,7 @@ import flatspec._
 import matchers._
 
 import Parser._
+import Span.Conversions._
 import Css._
 
 class CssSpec extends AnyFlatSpec with should.Matchers {

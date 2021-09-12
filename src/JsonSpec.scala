@@ -3,6 +3,7 @@ package bentkus.parser
 import org.scalatest._
 import flatspec._
 import matchers._
+import Span.Conversions._
 
 import Parser._
 import Json._

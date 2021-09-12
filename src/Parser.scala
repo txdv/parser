@@ -11,7 +11,7 @@ object Parser {
     def ++(x: => A): A
   }
 
-  def bind[T, S](p: Parser[T], f: T => Parser[S])(input: String): Result[S] = {
+  def bind[T, S](p: Parser[T], f: T => Parser[S])(input: Span): Result[S] = {
     for {
       (value1, input1) <- p(input)
       result <- f(value1)(input1)
@@ -30,7 +30,7 @@ object Parser {
     }
   }
 
-  def plus[T](p: Parser[T], q: => Parser[T])(input: String): Result[T] = {
+  def plus[T](p: Parser[T], q: => Parser[T])(input: Span): Result[T] = {
     p(input) ++ q(input)
   }
     
@@ -38,11 +38,11 @@ object Parser {
     def ++(q: => Parser[T]): Parser[T] = plus(p, q)
   }
 
-  val item: Parser[Char] = { input: String =>
+  val item: Parser[Char] = { input: Span =>
     if (input.length == 0) {
       List.empty
     } else {
-      List((input(0), input.substring(1)))
+      List((input.char(0), input.substring(1)))
     }
   }
 
@@ -51,9 +51,9 @@ object Parser {
   }
 
 
-  def result[T](v: T): Parser[T] = (input: String) => List((v, input))
+  def result[T](v: T): Parser[T] = (input: Span) => List((v, input))
 
-  def zero[T]: Parser[T] = (input: String) => List.empty
+  def zero[T]: Parser[T] = (input: Span) => List.empty
 
 
   implicit class ParserWithFilter(p: Parser[Char]) {
@@ -79,9 +79,9 @@ object Parser {
 
   val alphanum = plus(letter, digit)(_)
 
-  def ident(str: String): Parser[String] = { input: String =>
-    if (input.startsWith(str)) {
-      List((str, input.substring(str.length)))
+  def ident(prefix: Span): Parser[Span] = { input: Span =>
+    if (input.startsWith(prefix)) {
+      List((prefix, input.substring(prefix.length)))
     } else {
       List.empty
     }
@@ -186,7 +186,7 @@ object Parser {
     (char('-'), (a: Int, b: Int) => a - b),
   ))
 
-  def take(p: Char => Boolean): Parser[String] = { input: String =>
+  def take(p: Char => Boolean): Parser[Span] = { input: Span =>
     val result = input.takeWhile(p)
 
     if (result.length > 0) {
@@ -196,12 +196,12 @@ object Parser {
     }
   }
 
-  def next: Parser[Option[Char]] = { input: String =>
+  def next: Parser[Option[Char]] = { input: Span =>
     val empty = (None, input)
     if (input.length == 0) {
       List(empty)
     } else {
-      val found = (Some(input(0)), input.substring(1))
+      val found = (Some(input.char(0)), input.substring(1))
       List(found, empty)
     }
   }

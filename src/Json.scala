@@ -1,6 +1,7 @@
 package bentkus.parser
 
 import Parser._
+import Span.Conversions._
 
 sealed trait JObject
 
@@ -43,7 +44,7 @@ object Json {
   val `"` = char('"')
   val jstring = for {
     str <- bracket(`"`, take(_ != '"'), `"`)
-  } yield JString(str.mkString)
+  } yield JString(str)
 
   val jarray: Parser[JArray] = for {
     _ <- `[`

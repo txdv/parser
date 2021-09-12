@@ -2,6 +2,8 @@ package bentkus.parser
 
 import Parser._
 
+import Span.Conversions._
+
 sealed trait Html {
   val children: Seq[Html]
 }
@@ -52,7 +54,7 @@ object Html {
     _ <- `"`
     value <- take(_ != '"')
     _ <- `"`
-  } yield (key -> value)
+  } yield (key.string -> value.string)
 
   def attributes(parse: Boolean) =
     if (parse) {
