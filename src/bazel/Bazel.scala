@@ -84,10 +84,15 @@ object Bazel {
     } yield Func(name, args)
   }
 
+  def sepByN[T](expr: Parser[T], sep: Parser[Char]) = for {
+    expr <- sepBy1(exp, sep)
+    _ <- opt(sep)
+  } yield expr
+
   lazy val arr: Parser[Arr] = token {
     for {
       _ <- `[`
-      expressions <- sepBy1(exp, `,`)
+      expressions <- sepByN(exp, `,`)
       _ <- `]`
     } yield Arr(expressions)
   }

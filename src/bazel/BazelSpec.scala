@@ -50,6 +50,10 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
     eval(arr("[1,2,3]")) should be(Some {
       Arr(Seq(Num(1), Num(2), Num(3)))
     })
+
+    eval(arr("[1,2,3,]")) should be(Some {
+      Arr(Seq(Num(1), Num(2), Num(3)))
+    })
   }
 
   "bazel" should "parse methods on expressions" in {
