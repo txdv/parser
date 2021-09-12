@@ -8,6 +8,7 @@ import matchers._
 import Parser._
 import Bazel._
 import Ast._
+import Ast.Conversions._
 
 class ParserSpec extends AnyFlatSpec with should.Matchers {
   "bazel" should "parse whitespace" in {
@@ -17,7 +18,7 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
 
   "bazel" should "parse simple definitions" in {
     eval(identifier("text")) should be (Some("text"))
-    eval(identifier("123")) should be (Some("123"))
+    eval(identifier("a123")) should be (Some("a123"))
   }
 
   "bazel" should "parse number" in {
@@ -25,8 +26,8 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
   }
 
   "bazel" should "parse identifier" in {
-    eval(identifier(" 123")) should be(Some("123"))
-    eval(identifier("\t\n123")) should be(Some("123"))
+    eval(identifier("a123")) should be(Some("a123"))
+    eval(identifier("\t\na123")) should be(Some("a123"))
   }
 
   "bazel" should "parse decl" in {
@@ -36,9 +37,24 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
   }
 
   "bazel" should "parse function call" in {
-    eval(exp("func(123)")) should be(Some(Func("func", Seq(Num(123)))))
-    eval(exp("123")) should be(Some(Num(123)))
-    eval(exp("asd")) should be(Some(Ident("asd")))
+    eval(exp("func(123)")) should be(Some {
+      Func("func", Seq(Func.Arg.Pure(Num(123))))
+    })
+
+    eval(exp("func(a = 123)")) should be(Some {
+      Func("func", Seq(Func.Arg.Named("a", Num(123))))
+    })
   }
 
+  "bazel" should "parse arr" in {
+    eval(arr("[1,2,3]")) should be(Some {
+      Arr(Seq(Num(1), Num(2), Num(3)))
+    })
+  }
+
+  "bazel" should "parse methods on expressions" in {
+    eval(exp("123.call(1)")) should be(Some {
+      Method(Num(123), Func("call", Seq(Num(1))))
+    })
+  }
 }

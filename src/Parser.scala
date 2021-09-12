@@ -55,6 +55,17 @@ object Parser {
 
   def zero[T]: Parser[T] = (input: String) => List.empty
 
+  def opt[T](p: Parser[T]): Parser[Option[T]] = { input: String =>
+    val result = p(input).map { case (value, rest) =>
+      (Some(value), rest)
+    }
+
+    if (result.size > 0) {
+      result
+    } else {
+      List((None, input))
+    }
+  }
 
   implicit class ParserWithFilter(p: Parser[Char]) {
     def withFilter(p: Char => Boolean): Parser[Char] = for {
@@ -193,6 +204,26 @@ object Parser {
       List((result, input.substring(result.length)))
     } else {
       List.empty
+    }
+  }
+
+  def takeEmpty(p: Char => Boolean): Parser[String] = { input: String =>
+    val result = input.takeWhile(p)
+
+    List((result, input.substring(result.length)))
+  }
+
+  def takeFirst(first: Char => Boolean, rest: Char => Boolean): Parser[String] = { input: String =>
+    if (input.length == 0 || !first(input(0))) {
+      List.empty
+    } else {
+      var i = 1
+      while (i < input.length && rest(input(i))) {
+        i += 1
+      }
+      val result = input.take(i)
+
+      List((result, input.substring(result.length)))
     }
   }
 
