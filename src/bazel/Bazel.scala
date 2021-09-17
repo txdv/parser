@@ -9,8 +9,9 @@ object Ast {
   object Conversions {
     implicit def expr2FuncArgPure(expr: Expr): Func.Arg.Pure =
       Func.Arg.Pure(expr)
-
   }
+
+  case class Comment(commnet: String) extends Ast
 
   case class ValDecl(name: String, value: Expr) extends Ast
 
@@ -127,9 +128,22 @@ object Bazel {
 
   val expressions = many(exp)
 
+  /*
+  val expression = for {
+    c <- opt(comment)
+    expr <- c.map(i => result(i)).getOrElse(exp)
+  } yield expr
+  */
+
   val file = for {
-    result <- many(exp)
+    result <- many(expression)
     _ <- whitespace
   } yield result
+
+  val comment = for {
+    _ <- char('#')
+    value <- take(_ != '\n')
+    _ <- opt(char('\n'))
+  } yield Comment(value)
 
 }

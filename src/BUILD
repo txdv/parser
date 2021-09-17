@@ -59,3 +59,7 @@ scala_binary(
     name = "test",
     main_class = "bentkus.parser.Test",
     srcs = ["Test.scala"])
+
+scala_library(
+    name = "io",
+    srcs = ["IO.scala"])

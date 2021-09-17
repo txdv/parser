@@ -1,5 +1,7 @@
 package bentkus.parser
 
+import scala.jdk.CollectionConverters._
+
 object Parser {
   trait Monad[F[_], +T] {
     def map[S](f: T => S): F[S]
@@ -12,10 +14,31 @@ object Parser {
   }
 
   def bind[T, S](p: Parser[T], f: T => Parser[S])(input: String): Result[S] = {
-    for {
+    val pname = p.toString
+    val stack = new java.util.LinkedList[Parser[S]]()
+
+    val r = for {
       (value1, input1) <- p(input)
-      result <- f(value1)(input1)
+      p2 = f(value1)
+      _ = stack.push(p2)
+      result <- p2(input1)
     } yield result
+
+    /*
+    if (r.size > 2) {
+      println("=" * 50)
+      println(s"p: $pname")
+      stack.listIterator().asScala.foreach { i =>
+        println(s"  $i")
+      }
+      println(s"${r.size} ")
+      println("=" * 50)
+      println(r)
+      println("=" * 50)
+    }
+    */
+
+    r
   }
 
   implicit class ParserMonad[T](p: Parser[T]) extends Monad[Parser, T] {
@@ -31,7 +54,8 @@ object Parser {
   }
 
   def plus[T](p: Parser[T], q: => Parser[T])(input: String): Result[T] = {
-    p(input) ++ q(input)
+    val result = p(input) ++ q(input)
+    result
   }
     
   implicit class ParserSemigroup[T](p: Parser[T]) extends Semigroup[Parser[T]] {

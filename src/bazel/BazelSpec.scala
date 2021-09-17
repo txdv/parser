@@ -1,6 +1,6 @@
 package bentkus.parser.bazel
 
-import bentkus.parser.Parser
+import bentkus.parser.{Parser, IO}
 import org.scalatest._
 import flatspec._
 import matchers._
@@ -61,4 +61,11 @@ class ParserSpec extends AnyFlatSpec with should.Matchers {
       Method(Num(123), Func("call", Seq(Num(1))))
     })
   }
+
+  "bazel" should "parse comments" in {
+    eval(comment("#some comment\n")) should be(Some {
+      Comment("some comment")
+    })
+  }
+
 }
