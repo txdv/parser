@@ -55,6 +55,17 @@ scala_test(
     srcs = ["CssSpec.scala"],
     deps = [":css"])
 
+scala_library(
+    name = "sql",
+    srcs = ["Sql.scala"],
+    deps = [":parser"],
+    exports = [":parser"])
+
+scala_test(
+    name = "sql_spec",
+    srcs = ["SqlSpec.scala"],
+    deps = [":sql"])
+
 scala_binary(
     name = "test",
     main_class = "bentkus.parser.Test",
